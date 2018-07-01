@@ -5,7 +5,7 @@ const mapboxToken = "access_token=pk.eyJ1IjoiYnJvd25kMTAiLCJhIjoiY2poeGh5aHNoMGJ
 var queryUrl = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_week.geojson";
 
 // Store our tectonic plates data API endpoint inside platesUrl
-var platesLink = "https://raw.githubusercontent.com/fraxen/tecPlates/master/GeoJSON/PB2002_boundaries.json"
+var platesLink = "https://raw.githubusercontent.com/fraxen/tectonicplates/b53c3b7d82afd764650ebdc4565b9666795b9d83/GeoJSON/PB2002_boundaries.json";
 
 // Perform a GET request to the Earthquake query URL
 d3.json(queryUrl, function(data) {
@@ -20,13 +20,13 @@ function createFeatures(earthquakeData) {
     var earthquakes = L.geoJson(earthquakeData, {
       onEachFeature: function (feature, layer){
         layer.bindPopup("<h3>" + feature.properties.title + "<br> Magnitude: " + feature.properties.mag +
-        "</h3><hr><p>" + new Duration(feature.properties.dmin) + "</p>");
+        "</h3><hr><p>" + new Date(feature.properties.time) + "</p>");
       },
       pointToLayer: function (feature, latlng) {
         return new L.circle(latlng, {
             radius: getRadius(feature.properties.mag),
             fillColor: getColor(feature.properties.mag),
-            fillOpacity: .25,
+            fillOpacity: 1,
             stroke: true,
             color: "black",
             weight: .5
@@ -41,19 +41,19 @@ function createFeatures(earthquakeData) {
   function createMap(earthquakes) {
   
     // Define map layers
-    var streetMap = L.tileLayer("https://http://api.mapbox.com/v4/mapbox.streets.html?" + mapboxToken);
+    var streetMap = L.tileLayer("https://api.mapbox.com/styles/v1/mapbox/streets-v10/tiles/256/{z}/{x}/{y}?" + mapboxToken);
   
-    var streetSatelliteMap = L.tileLayer("https://http://api.mapbox.com/v4/mapbox.streets-satellite.html?" + mapboxToken);
+    var streetSatelliteMap = L.tileLayer("https://api.mapbox.com/styles/v1/mapbox/satellite-streets-v10/tiles/256/{z}/{x}/{y}?" + mapboxToken);
   
-    var rbhMap = L.tileLayer("https://http://api.mapbox.com/v4/mapbox.run-bike-hike.html?" + mapboxToken);
+    var lightMap = L.tileLayer("https://api.mapbox.com/styles/v1/mapbox/light-v9/tiles/256/{z}/{x}/{y}?" + mapboxToken);
   
     
   
     // Define a baseMaps object to hold our base layers
     var baseMaps = {
-      "Streets Map": streetMap,
-      "Streets Satellite Map": streetSatelliteMap,
-      "Run Bike Hike Map": rbhMap
+      "Street Map": streetMap,
+      "Satellite Streets Map": streetSatelliteMap,
+      "Light Map": lightMap
     };
   
     // Add a tectonic plate layer
@@ -67,15 +67,15 @@ function createFeatures(earthquakeData) {
   
     // Create our map, with layers to display on load
     var myMap = L.map("map", {
-      center: [0, 0],
-      zoom: 4,
+      center: [39.8283, -98.5795], //falls in the middle of America
+      zoom: 1.5,
       layers: [streetMap, earthquakes, tecPlates]
     });
   
      // Add Fault lines data
      d3.json(platesLink, function(plates) {
        L.geoJson(plates, {
-         color: "blue",
+         color: "green",
          weight: 2
        })
        .addTo(tecPlates);
@@ -89,18 +89,18 @@ function createFeatures(earthquakeData) {
     }).addTo(myMap);
   
     // Create legend
-    var legend = L.control({position: 'topright'});
+    var legend = L.control({position: 'topleft'});
   
     legend.onAdd = function (myMap) {
   
       var div = L.DomUtil.create('div', 'info legend'),
-                grades = [0, 1, 2, 3, 4, 5],
+                grades = [4.5, 5],
                 labels = [];
   
-    // loop through our density intervals and generate a label with a colored square for each interval
+    // loop through our density intervals and generate the color labels
       for (var i = 0; i < grades.length; i++) {
           div.innerHTML +=
-              '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
+              '<i style="background:' + getColor(grades[i] + .1) + '"></i> ' +
               grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
       }
       return div;
@@ -110,15 +110,10 @@ function createFeatures(earthquakeData) {
   }
   
   function getColor(c) {
-    return c > 5 ? '#F30' :
-    c > 4  ? '#F60' :
-    c > 3  ? '#F90' :
-    c > 2  ? '#FC0' :
-    c > 1   ? '#FF0' :
-              '#9F3';
+    return c >= 5 ? '#FF0000' :
+           '#FFFF00';
   }
   
   function getRadius(value){
-    return value*40000
+    return value*50000
   }
-

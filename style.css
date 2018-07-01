@@ -1,5 +1,5 @@
 #header {
-  background-color: steelblue;
+  background-color:whitesmoke;
 }
 
 h1,
@@ -14,7 +14,6 @@ body,
 html {
   height: 100%;
   margin: 0;
-  background-color: seashell;
 }
 
 body {
@@ -24,8 +23,8 @@ body {
 
 .legend {
   line-height: 18px;
-  color: #555;
-  background-color:slategrey;
+  color: black;
+  background-color: slategray;
   padding: 10px;
   -webkit-border-radius: 8px;
   -moz-border-radius: 8px;
@@ -53,7 +52,5 @@ body {
 
 .jumbotron {
   text-align: center;
-  color: black;
-  /* background: url("Images/earthquake.jpg") center center; */
-  background-size: cover;
+  color: purple;
 }
